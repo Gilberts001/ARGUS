@@ -14,8 +14,10 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           
-      - name: Create project files
+      - name: Create Gradle project
         run: |
+          gradle init --type basic --dsl kotlin --project-name ARGUS --no-comments
+          rm -rf app
           mkdir -p app/src/main/java/com/bossgilbert/argus
           mkdir -p app/src/main/res/values app/src/main/res/mipmap-xxxhdpi
           
@@ -24,23 +26,10 @@ jobs:
           include(":app")
           EOF
           
-          cat > build.gradle.kts << 'EOF'
-          plugins {
-              id("com.android.application") version "8.4.0" apply false
-              id("org.jetbrains.kotlin.android") version "1.9.22" apply false
-          }
-          EOF
-          
-          cat > gradle.properties << 'EOF'
-          org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
-          android.useAndroidX=true
-          android.nonTransitiveRClass=true
-          EOF
-          
           cat > app/build.gradle.kts << 'EOF'
           plugins {
-              id("com.android.application")
-              id("org.jetbrains.kotlin.android")
+              id("com.android.application") version "8.4.0"
+              id("org.jetbrains.kotlin.android") version "1.9.22"
           }
           android {
               namespace = "com.bossgilbert.argus"
@@ -72,8 +61,7 @@ jobs:
               <application
                   android:allowBackup="true"
                   android:icon="@mipmap/ic_blue_eye"
-                  android:label="ARGUS"
-                  android:theme="@style/Theme.Material3.DayNight">
+                  android:label="ARGUS">
                   <activity
                       android:name=".MainActivity"
                       android:exported="true">
@@ -88,29 +76,14 @@ jobs:
           
           cat > app/src/main/java/com/bossgilbert/argus/MainActivity.kt << 'EOF'
           package com.bossgilbert.argus
-          import androidx.appcompat.app.AppCompatActivity
           import android.os.Bundle
+          import androidx.appcompat.app.AppCompatActivity
           class MainActivity : AppCompatActivity() {
               override fun onCreate(savedInstanceState: Bundle?) {
                   super.onCreate(savedInstanceState)
-                  setContentView(android.R.layout.simple_list_item_1)
               }
           }
           EOF
           
           base64 -d > app/src/main/res/mipmap-xxxhdpi/ic_blue_eye.png << 'EOF'
-          iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==
-          EOF
-          
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-        
-      - name: Build APK
-        run: gradle assembleDebug
-        
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: ARGUS-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
+          iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPh
